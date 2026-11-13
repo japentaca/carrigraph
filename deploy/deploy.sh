@@ -43,4 +43,4 @@ echo "== comprobación"
 sleep 2
 curl -fsS -o /dev/null -w "galería: HTTP %{http_code}\n" "http://127.0.0.1:$PORT/api/gallery"
 curl -fsS -o /dev/null -w "portada: HTTP %{http_code}\n" "http://127.0.0.1:$PORT/"
-echo "Deploy OK: $(git log --oneline -1)"
+echo "Deploy OK: $(as_app git log --oneline -1)"

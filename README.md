@@ -270,7 +270,8 @@ La base SQLite es un archivo (`DB_PATH`): conviene ubicarlo fuera del directorio
 ## Estructura
 
 ```
-server/            API: app.js (createApp), index.js (listen), database.js (SQLite y migraciones), routes/,
+server/            API: app.js (createApp), index.js (listen), start.js (entrada para pm2), database.js (SQLite y
+                   migraciones), routes/,
                    seed.js + seeds/examples.json (proyectos de ejemplo)
 deploy/            despliegue: nginx, pm2 (ecosystem), deploy.sh y la guía
 src/audio/engine/  motor: partitura, voces, efectos, buses, transporte, render WAV, medidor, grabación
