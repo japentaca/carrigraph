@@ -9,7 +9,7 @@ Leelo antes de explorar el código.
 
 ```bash
 npm run dev:full     # API (3001) + Vite (3000, proxy de /api)
-npm test             # todo: 640 tests, ~20 s
+npm test             # todo: 643 tests, ~20 s
 npm run test:unit    # src/**/__tests__ (jsdom)
 npm run test:server  # tests/ (Node, SQLite en memoria)
 npx vitest run src/__tests__/guest.test.js   # un archivo
@@ -129,20 +129,23 @@ Los tests no alcanzan para cambios de interfaz o de audio: probar en Chrome.
 
 ## Despliegue
 
-El usuario despliega en un servidor propio en la nube. Pasos (detalle en "Despliegue en producción" del README):
+Publicado en `https://carrigraph.jape.com.ar` (servidor propio del usuario: nginx + pm2, detrás de Cloudflare).
+Todo el detalle está en `deploy/README.md`: rutas en el servidor, instalación inicial, actualización y vuelta atrás.
 
-```bash
-npm ci
-npm run build
-npm run seed    # ejemplos en la galería; se puede repetir, también con el servidor andando
-NODE_ENV=production JWT_SECRET=... CORS_ORIGIN=https://tu-dominio npm start
-```
-
-- El seed es un comando manual a propósito: el servidor no carga ejemplos al arrancar.
-- Cuando cambian los ejemplos locales: `npm run seed:export`, commit, y en el servidor `git pull` + `npm run seed`
-  (actualiza los que cambiaron, no toca proyectos de usuarios).
-- Hay que desplegar `server/` junto con `src/` (el servidor importa módulos de ahí). Detrás de un proxy inverso
-  falta configurar `trust proxy` para los límites por IP.
+- **Actualizar**: con los cambios ya en `main` de GitHub, en el servidor como root:
+  `bash /var/lib/carrigraph/carrigraph/deploy/deploy.sh` (respalda la base, `git pull`, `npm ci`, build, seed,
+  recarga pm2 y comprueba que responda).
+- Los datos de conexión SSH no están en este repo (es público): están en `instrucciones.txt` del proyecto
+  `mi-web` del usuario (`C:/Users/jntac/Documents/prj/jape/mi-web`), que también tiene la portada `jape.com.ar`
+  y su lista de links (`assets/links.json`, se sube con `./deploy.ps1 -Only links`).
+- El servidor aloja otros sitios y apps (Looper, Carrilion, Umami…): no tocar su configuración. Cada app tiene
+  su usuario de sistema y su pm2 (`PM2_HOME=/var/lib/<app>/.pm2`); **no correr `pm2` como root** (levanta un
+  daemon de root vacío).
+- Desplegar es una acción sobre producción: hacerla solo cuando el usuario lo pide.
+- En producción la app corre con `HOST=127.0.0.1` y `TRUST_PROXY=loopback`; nginx manda todo a Node, que sirve
+  `dist/` y la API. Una funcionalidad que dependa de la IP del visitante tiene que usar `req.ip`.
+- El seed es un comando manual a propósito (lo corre `deploy.sh`): el servidor no carga ejemplos al arrancar.
+  Cuando cambian los ejemplos locales: `npm run seed:export`, commit, push y desplegar.
 
 ## Repositorio
 

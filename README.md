@@ -47,6 +47,8 @@ Abrir `http://localhost:3000`. También se pueden levantar por separado: `npm ru
 | `PORT` | `3001` | Puerto de la API. |
 | `CORS_ORIGIN` | `http://localhost:3000` | Orígenes permitidos, separados por coma, o `*`. |
 | `DB_PATH` | `server/data/carrigraph.db` | Archivo SQLite. Se crea y se migra solo al arrancar. |
+| `HOST` | todas las interfaces | Interfaz en la que escucha. Detrás de un proxy inverso: `127.0.0.1`. |
+| `TRUST_PROXY` | — | Detrás de un proxy inverso: `loopback` (o un número de saltos), para que los límites por IP usen la IP del visitante (`X-Forwarded-For`). |
 | `NODE_ENV` | — | `production`: el servidor además sirve `dist/` (ver Despliegue). `test`: apaga los límites de tasa. |
 
 ---
@@ -257,7 +259,10 @@ Con `NODE_ENV=production` el servidor sirve `dist/` y responde `index.html` a cu
 `src/editor/graphState.js`, `src/sharing/publicProject.js`) para validar y servir los proyectos públicos y contar
 pistas. Hay que desplegar `server/` **junto con `src/`** (y `package.json`/`node_modules`), no `server/` solo.
 
-Detrás de un proxy inverso, los límites por IP necesitan `app.set('trust proxy', …)`, que hoy no está configurado.
+Detrás de un proxy inverso (nginx): `HOST=127.0.0.1` para que solo se entre por el proxy y
+`TRUST_PROXY=loopback` para que los límites por IP cuenten la IP del visitante y no la del proxy. La instalación
+en `carrigraph.jape.com.ar` (usuario de sistema, pm2, nginx, script de actualización) está en
+[`deploy/README.md`](deploy/README.md).
 La base SQLite es un archivo (`DB_PATH`): conviene ubicarlo fuera del directorio de la app y respaldarlo.
 
 ---
@@ -267,6 +272,7 @@ La base SQLite es un archivo (`DB_PATH`): conviene ubicarlo fuera del directorio
 ```
 server/            API: app.js (createApp), index.js (listen), database.js (SQLite y migraciones), routes/,
                    seed.js + seeds/examples.json (proyectos de ejemplo)
+deploy/            despliegue: nginx, pm2 (ecosystem), deploy.sh y la guía
 src/audio/engine/  motor: partitura, voces, efectos, buses, transporte, render WAV, medidor, grabación
 src/audio/graph/   compilador, tipos de nodo y puertos, conexiones, migración, parámetros, macros, validación
 src/audio/         generadores de patrones, MIDI (escritura y entrada)
@@ -289,7 +295,7 @@ src/views/         Login, Proyectos, Editor, Compartido/Galería, Perfil (todas 
 - La grabación depende de `MediaRecorder` (formato según navegador; sin él, el botón queda deshabilitado).
 - Expandir un nodo lo dibuja encima de sus vecinos, pero no los corre.
 - El portapapeles de nodos es interno de la pestaña (no usa el del sistema).
-- Límites de tasa por IP sin `trust proxy`; caché de cantidad de pistas en memoria del proceso.
+- La caché de cantidad de pistas de la galería vive en la memoria del proceso.
 - Con varios guardados en el mismo milisegundo no se detectaría un conflicto (impracticable desde la interfaz).
 - `npm audit` informa 4 vulnerabilidades moderadas solo de desarrollo, en la cadena `@vue/test-utils → js-beautify`;
   la dependencia de producción no tiene ninguna (`npm audit --omit=dev`).

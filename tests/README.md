@@ -46,4 +46,5 @@ desactivado salvo en los tests que lo prueban explícitamente.
   máximo 50, numeración con `MAX`), transacciones.
 - `seed.test.js` — proyectos de ejemplo: el archivo es válido y suena, se publican en orden,
   el seed es idempotente y no toca datos de usuarios, nadie puede entrar como su dueño.
+- `proxy.test.js` — `TRUST_PROXY`: los límites por IP usan la IP del visitante detrás de un proxy.
 - `helpers.js` / `setup.js` — utilidades y entorno.

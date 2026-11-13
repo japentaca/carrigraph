@@ -26,6 +26,20 @@ export const parseCorsOrigin = (value) => {
 }
 
 /**
+ * Parse TRUST_PROXY for Express' `trust proxy` setting: empty → undefined
+ * (not set), `true` / `false`, a number of hops, or a value Express
+ * understands as is (`loopback`, an address, a comma-separated list).
+ */
+export const parseTrustProxy = (value) => {
+  if (value == null || !String(value).trim()) return undefined
+  const v = String(value).trim()
+  if (v === 'true') return true
+  if (v === 'false') return false
+  if (/^\d+$/.test(v)) return Number(v)
+  return v
+}
+
+/**
  * Build the Express app. Does not listen; see server/index.js.
  *
  * @param {object} options
@@ -38,6 +52,9 @@ export const parseCorsOrigin = (value) => {
  * @param {false|{ windowMs?: number, max?: number }} [options.publicRateLimit] - limit for
  *   the public endpoints (/api/shared, /api/gallery); `false` disables it (default:
  *   disabled in tests; 120 requests per minute per IP otherwise)
+ * @param {boolean|number|string} [options.trustProxy] - Express `trust proxy`. Behind a
+ *   reverse proxy (nginx) set it (`loopback`) so `req.ip`, and with it the per-IP rate
+ *   limits, is the visitor's address taken from X-Forwarded-For. Default: TRUST_PROXY
  * @param {boolean} [options.serveStatic] - serve `distDir` with SPA fallback
  * @param {string} [options.distDir]
  */
@@ -48,6 +65,7 @@ export const createApp = (options) => {
     corsOrigin = parseCorsOrigin(process.env.CORS_ORIGIN),
     rateLimit: rateLimitOptions = process.env.NODE_ENV === 'test' ? false : {},
     publicRateLimit: publicRateLimitOptions = process.env.NODE_ENV === 'test' ? false : {},
+    trustProxy = parseTrustProxy(process.env.TRUST_PROXY),
     serveStatic = process.env.NODE_ENV === 'production',
     distDir = DEFAULT_DIST_DIR
   } = options
@@ -59,6 +77,9 @@ export const createApp = (options) => {
   const passport = new Passport()
 
   app.disable('x-powered-by')
+  // Not set by default: trusting X-Forwarded-For without a proxy in front
+  // would let any client choose its own IP for the rate limits.
+  if (trustProxy !== undefined) app.set('trust proxy', trustProxy)
 
   app.use(helmet({
     contentSecurityPolicy: {
