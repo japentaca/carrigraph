@@ -44,4 +44,6 @@ desactivado salvo en los tests que lo prueban explícitamente.
 - `phase1-api.test.js` — normalización de email, contraseña mínima, resumen de
   proyectos, validación de grafo, versiones (lista liviana, versión completa,
   máximo 50, numeración con `MAX`), transacciones.
+- `seed.test.js` — proyectos de ejemplo: el archivo es válido y suena, se publican en orden,
+  el seed es idempotente y no toca datos de usuarios, nadie puede entrar como su dueño.
 - `helpers.js` / `setup.js` — utilidades y entorno.

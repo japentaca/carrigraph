@@ -15,6 +15,8 @@
     "preview": "vite preview",
     "server": "node --env-file-if-exists=.env server/index.js",
     "start": "node --env-file-if-exists=.env server/index.js",
+    "seed": "node --env-file-if-exists=.env server/seed.js",
+    "seed:export": "node --env-file-if-exists=.env server/seed.js --export",
     "dev:full": "concurrently \"npm run server\" \"npm run dev\"",
     "test": "vitest run",
     "test:unit": "vitest run --project unit",

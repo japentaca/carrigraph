@@ -33,6 +33,8 @@ Abrir `http://localhost:3000`. También se pueden levantar por separado: `npm ru
 | `npm run dev:full` | las dos cosas a la vez (`concurrently`) |
 | `npm run build` | compila el frontend a `dist/` |
 | `npm run preview` | sirve `dist/` con Vite |
+| `npm run seed` | carga los proyectos de ejemplo en la base y los publica en la galería (se puede repetir) |
+| `npm run seed:export` | reescribe `server/seeds/examples.json` desde los proyectos locales llamados "Ejemplo…" |
 | `npm test` | todos los tests (frontend y backend) |
 | `npm run test:unit` / `npm run test:server` | solo frontend / solo backend |
 | `npm run test:watch` / `npm run test:coverage` | modo observador / cobertura (v8) |
@@ -237,8 +239,16 @@ define `JWT_SECRET` para los tests.
 ```bash
 npm ci
 npm run build
+npm run seed    # opcional: proyectos de ejemplo en la galería
 NODE_ENV=production JWT_SECRET=... CORS_ORIGIN=https://tu-dominio npm start
 ```
+
+**Proyectos de ejemplo.** `npm run seed` carga en la base (`DB_PATH`) los proyectos de
+`server/seeds/examples.json` y los publica en la galería, para que un servidor nuevo tenga algo para escuchar y
+los invitados algo para abrir. Pertenecen a un usuario del sistema ("CarriGraph") con el que nadie puede iniciar
+sesión. Se puede correr más de una vez, también con el servidor andando: agrega los que falten, actualiza los que
+cambiaron y no toca los proyectos de los usuarios. Para cambiar los ejemplos: editarlos localmente (proyectos cuyo
+nombre empiece con "Ejemplo"), `npm run seed:export`, y versionar el archivo.
 
 Con `NODE_ENV=production` el servidor sirve `dist/` y responde `index.html` a cualquier GET que no sea `/api/...`
 (así funcionan las rutas del SPA: `/editor/:id`, `/s/:token`, `/gallery`, `/profile`…).
@@ -255,7 +265,8 @@ La base SQLite es un archivo (`DB_PATH`): conviene ubicarlo fuera del directorio
 ## Estructura
 
 ```
-server/            API: app.js (createApp), index.js (listen), database.js (SQLite y migraciones), routes/
+server/            API: app.js (createApp), index.js (listen), database.js (SQLite y migraciones), routes/,
+                   seed.js + seeds/examples.json (proyectos de ejemplo)
 src/audio/engine/  motor: partitura, voces, efectos, buses, transporte, render WAV, medidor, grabación
 src/audio/graph/   compilador, tipos de nodo y puertos, conexiones, migración, parámetros, macros, validación
 src/audio/         generadores de patrones, MIDI (escritura y entrada)

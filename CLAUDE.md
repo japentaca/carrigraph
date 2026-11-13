@@ -9,11 +9,13 @@ Leelo antes de explorar el código.
 
 ```bash
 npm run dev:full     # API (3001) + Vite (3000, proxy de /api)
-npm test             # todo: 635 tests, ~20 s
+npm test             # todo: 640 tests, ~20 s
 npm run test:unit    # src/**/__tests__ (jsdom)
 npm run test:server  # tests/ (Node, SQLite en memoria)
 npx vitest run src/__tests__/guest.test.js   # un archivo
 npm run build        # dist/
+npm run seed         # ejemplos de server/seeds/examples.json → base (DB_PATH), publicados en la galería
+npm run seed:export  # proyectos locales "Ejemplo…" → server/seeds/examples.json
 ```
 
 `.env` (no versionado) necesita `JWT_SECRET`; ver `.env.example`.
@@ -46,6 +48,7 @@ npm run build        # dist/
 | Una ruta o vista | `src/router/index.js` (carga diferida con `import()`), metas `requiresAuth` / `requiresGuest` / `allowGuest` |
 | Una acción del editor | `useEditorNodes.js` (nodos, selección, grupo), atajo en `useKeyboard` dentro de `Editor.vue` y en `ShortcutsHelp.vue` |
 | Estado del proyecto | `src/stores/useProjectStore.js` |
+| Los proyectos de ejemplo | editarlos en la app local (nombre que empiece con "Ejemplo"), `npm run seed:export` y versionar `server/seeds/examples.json`; no editar el JSON a mano |
 
 ## Cosas que no se ven leyendo un solo archivo
 
@@ -79,6 +82,9 @@ npm run build        # dist/
 - Lo que sale del servidor sin sesión pasa por `toPublicGraph` (`src/sharing/publicProject.js`): lista blanca
   de campos, sin ids de usuario, emails ni metadata interna (tampoco macros). Un dato nuevo del proyecto no
   se publica salvo que se agregue ahí a propósito.
+- Los ejemplos del seed (`server/seed.js`) son de un usuario del sistema sin contraseña utilizable y pasan por
+  `toPublicGraph`. Si cambia el esquema del grafo, re-exportarlos (`tests/seed.test.js` exige que estén en la
+  forma migrada actual).
 - **El servidor importa módulos puros de `src/`** (`src/audio/graph/`, `src/editor/graphState.js`,
   `src/sharing/publicProject.js`): esos archivos no pueden usar Vue, Pinia ni APIs del navegador.
 
@@ -120,6 +126,23 @@ Los tests no alcanzan para cambios de interfaz o de audio: probar en Chrome.
 2. Actualizar el `README.md` si cambia el uso, la API, los nodos o las limitaciones.
 3. Actualizar este archivo si aparece una convención nueva o una trampa que no se ve en el código.
 4. Informar qué se verificó en el navegador, qué solo por tests y qué no se verificó.
+
+## Despliegue
+
+El usuario despliega en un servidor propio en la nube. Pasos (detalle en "Despliegue en producción" del README):
+
+```bash
+npm ci
+npm run build
+npm run seed    # ejemplos en la galería; se puede repetir, también con el servidor andando
+NODE_ENV=production JWT_SECRET=... CORS_ORIGIN=https://tu-dominio npm start
+```
+
+- El seed es un comando manual a propósito: el servidor no carga ejemplos al arrancar.
+- Cuando cambian los ejemplos locales: `npm run seed:export`, commit, y en el servidor `git pull` + `npm run seed`
+  (actualiza los que cambiaron, no toca proyectos de usuarios).
+- Hay que desplegar `server/` junto con `src/` (el servidor importa módulos de ahí). Detrás de un proxy inverso
+  falta configurar `trust proxy` para los límites por IP.
 
 ## Repositorio
 
