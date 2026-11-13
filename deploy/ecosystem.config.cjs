@@ -10,7 +10,7 @@ module.exports = {
     {
       name: 'carrigraph',
       cwd: root,
-      script: 'server/index.js',
+      script: 'server/start.js',
       node_args: '--env-file=.env',
       exec_mode: 'fork',
       instances: 1,
