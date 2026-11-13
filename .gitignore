@@ -1,0 +1,15 @@
+node_modules/
+dist/
+coverage/
+server/data/*.db
+server/data/*.db-journal
+server/data/*.db-wal
+server/data/*.db-shm
+.env
+.env.*
+!.env.example
+*.log
+
+# Registro interno de trabajo (no se publica)
+PLAN.md
+docs/
